@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
+import Home from "./components/Home";
 
 function App() {
   const [user, setUser] = useState();
@@ -54,8 +55,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="login" element={<Login />} />
-        <Route path="test" element={<div>test</div>} />\
-        <Route path="*" element={<div>catch</div>} />
+        <Route path="test" element={<div>test</div>} />
+        <Route path="*" element={<Home />} />
       </Routes>
     </BrowserRouter>
   );

@@ -59,7 +59,7 @@ function Login() {
 
           let user = await getUserData();
           setUser(user);
-          navigate("/test");
+          navigate("/home");
         } catch (err) {
           console.error(err);
         }
