@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Home from "./components/Home";
+import Chat from "./components/Chat";
 
 function App() {
   const [user, setUser] = useState();
@@ -56,6 +57,7 @@ function App() {
       <Routes>
         <Route path="login" element={<Login />} />
         <Route path="test" element={<div>test</div>} />
+        <Route path="chat/:chatId" element={<Chat />} />
         <Route path="*" element={<Home />} />
       </Routes>
     </BrowserRouter>

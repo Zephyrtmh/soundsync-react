@@ -59,6 +59,7 @@ function Login() {
 
           let user = await getUserData();
           setUser(user);
+          localStorage.setItem("user", JSON.stringify(user));
           navigate("/home");
         } catch (err) {
           console.error(err);
