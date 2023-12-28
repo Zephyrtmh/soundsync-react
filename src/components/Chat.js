@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import dayjs, { Dayjs } from "dayjs";
 
+import "./Chat.css";
+
 const supabaseUrl = "https://fdihsvoogljtmndllknu.supabase.co";
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -44,7 +46,7 @@ function Chat() {
       .from("message")
       .select("*")
       .eq("public_channel_id", chatId)
-      .order("sent_at", false)
+      .order("sent_at", { ascending: false })
       .limit(10);
 
     if (error) {
@@ -52,7 +54,7 @@ function Chat() {
       alert("error retrieving messages");
     }
 
-    setCurrentMessages(messages);
+    setCurrentMessages(messages.reverse());
 
     setRetrievingMessages(false);
   };
@@ -71,6 +73,7 @@ function Chat() {
       .from("message")
       .insert([
         {
+          author: user.display_name,
           body: userTextInput,
           public_channel_id: chatId,
         },
@@ -78,16 +81,26 @@ function Chat() {
       .select();
   };
 
+  if (retrievingMessages) {
+    return <div>loading</div>;
+  }
+
   return (
     <div>
       <h1>Welcome to Chat: {chatId}</h1>
       <div className="chat-content-container">
         {currentMessages.map((message) => {
           return (
-            <p key={message.id}>
-              {message.body}{" "}
-              {dayjs(message.sent_at).format("YYYY/MM/DD HH:mm:ss")}
-            </p>
+            <div
+              className={
+                user.display_name === message.author
+                  ? "user-message"
+                  : "other-user-message"
+              }
+            >
+              <p key={message.id}>{message.body}</p>
+              <p>{dayjs(message.sent_at).format("YYYY/MM/DD HH:mm:ss")}</p>
+            </div>
           );
         })}
       </div>

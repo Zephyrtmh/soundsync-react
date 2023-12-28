@@ -64,7 +64,7 @@ function Home() {
       //correct password
       alert("correct password");
       //navigate to chatroom
-      navigate(`/chat/${channels[0].public_channel_id}`);
+      navigate(`/channel/${channels[0].public_channel_id}`);
     } else {
       alert("wrong password");
     }
