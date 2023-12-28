@@ -1,3 +1,21 @@
-.channel-container {
-  display: grid;
+.channel-display-container {
+  display: flex;
+  flex-direction: row;
+  width: 100vw;
+  /* background-color: ba; */
+  /* grid-template-columns: 200px 1fr 200px;
+  grid-template-rows: 1vh; */
+}
+
+.channel-navigation-bar {
+  /* grid-column: span 2; */
+  width: 300px;
+}
+
+.channel {
+  width: 10fr;
+}
+
+.chat {
+  width: 300px;
 }
