@@ -13,6 +13,7 @@ function Home() {
   const [roomToJoin, setRoomToJoin] = useState();
   const [passwordRequired, setPasswordRequired] = useState(false);
   const [channelPasswordInput, setChannelPasswordInput] = useState();
+  const [error, setError] = useState();
 
   const handleJoinRoomSubmit = async (e) => {
     e.preventDefault();
@@ -59,14 +60,12 @@ function Home() {
       .eq("channel_name", roomToJoin.channel_name)
       .eq("channel_password", channelPasswordInput);
 
-    console.log(channels);
     if (channels.length === 1) {
-      //correct password
-      alert("correct password");
+      //action when correct password
       //navigate to chatroom
       navigate(`/channel/${channels[0].public_channel_id}`);
     } else {
-      alert("wrong password");
+      setError({ errorCode: "403", message: "password incorrect" });
     }
   };
 
@@ -94,6 +93,7 @@ function Home() {
             <button type="submit" onClick={handleSubmitChannelPassword}>
               Submit
             </button>
+            {error ? <p>{error.message}</p> : <p></p>}
           </form>
         </div>
       ) : (

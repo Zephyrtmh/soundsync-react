@@ -54,14 +54,26 @@ function App() {
   // }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="login" element={<Login />} />
-        <Route path="test" element={<div>test</div>} />
-        <Route path="channel/:chatId" element={<Channel />} />
-        <Route path="*" element={<Home />} />
-      </Routes>
-    </BrowserRouter>
+    <div>
+      <header>
+        {/* <div>
+          <ul className="devide-y divide-gray-200">
+            <li>soundsync</li>
+            <li>explore</li>
+            <li>sign up</li>
+            <li>login</li>
+          </ul>
+        </div> */}
+      </header>
+      <BrowserRouter>
+        <Routes>
+          <Route path="login" element={<Login />} />
+          <Route path="test" element={<div>test</div>} />
+          <Route path="channel/:chatId" element={<Channel />} />
+          <Route path="*" element={<Home />} />
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
 }
 
