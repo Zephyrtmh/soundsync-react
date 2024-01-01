@@ -139,7 +139,6 @@ function Home() {
 		let { data: channels, error } = await supabase
 			.from("channel")
 			.insert({ channel_name: channelCreateInput, public: true });
-		console.log(error);
 	};
 
 	const toggleCreateJoin = () => {
@@ -148,12 +147,12 @@ function Home() {
 
 	return (
 		<div className="flex items-center justify-center">
-			<div className="w-1/3">
+			<div className="w-4/5 sm:w-1/3">
 				<div className="pb-6">
-					<h1 className="text-7xl text-theme-red max-w-xl font-bold pb-6">
+					<h1 className="text-4xl sm:text-5xl xl:text-7xl text-theme-red max-w-xl font-bold pb-6">
 						Just in time for the party!
 					</h1>
-					<p className="text-theme-peach max-w-xl text-2xl">
+					<p className="text-theme-peach max-w-xl text:lg sm:text-xl xl:text-2xl">
 						Experience a unique blend of shared playlists and interactive
 						conversations. Dive into a vibrant community where music and
 						connection come together seamlessly. Your social music journey
@@ -240,7 +239,7 @@ function Home() {
 					)}
 				</div>
 			</div>
-			<div className="w-1/3">some art</div>
+			<div className="w-0 invisible sm:visible sm:w-1/3">some art</div>
 		</div>
 	);
 }

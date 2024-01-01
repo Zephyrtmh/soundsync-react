@@ -19,11 +19,13 @@ function Header() {
 	return (
 		<div className="flex justify-between items-center p-8 pr-10 text-theme-peach">
 			<div onClick={onHomeClick}>
-				<h1 className="text-xl font-bold">SoundSync</h1>
+				<h1 className="text-xl font-bold hover:cursor-pointer hover:underline ">
+					SoundSync
+				</h1>
 			</div>
 			<ul className="inline-flex space-x-12">
-				<li>Explore</li>
-				<li>Sign up</li>
+				<li className="hover:cursor-pointer hover:underline">Explore</li>
+				<li className="hover:cursor-pointer hover:underline">Sign up</li>
 			</ul>
 		</div>
 	);
