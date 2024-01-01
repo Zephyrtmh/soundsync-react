@@ -1,106 +1,248 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
+import Input from "./common/Input";
+import Button from "./common/Button";
 
 const supabaseUrl = "https://fdihsvoogljtmndllknu.supabase.co";
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+const exampleChannelInputPlaceholders = [
+	"20s Rock Music",
+	"TikTok Songs 2023",
+	"Lofi for the Soul",
+	"Study With Me",
+	"90's Rap",
+	"Chill with Friends",
+	"Indie Vibes",
+	"Feel Good Pop",
+	"Electronic Beats",
+	"Classic Rock Anthems",
+	"Soulful R&B",
+	"Country Hits",
+	"Upbeat Workout Tunes",
+	"Jazz & Blues",
+	"EDM Party Mix",
+	"Acoustic Favorites",
+	"Hip Hop Classics",
+	"Reggae Vibes",
+	"Latin Fiesta",
+	"Alternative Jams",
+	"Movie Soundtracks",
+	"Folk & Americana",
+	"80's Dance Party",
+	"Blissful Classical",
+	"Metal Mayhem",
+	"K-Pop Hits",
+	"Funky Grooves",
+	"Global Beats",
+	"Dreamy Synthwave",
+	"Kids' Favorites",
+	"Instrumental Focus",
+	"Dancehall Madness",
+	"World Music Wonders",
+	"Chill Electronic",
+];
+
 function Home() {
-  const navigate = useNavigate();
-  const [roomToJoinInput, setroomToJoinInput] = useState();
-  const [roomToJoin, setRoomToJoin] = useState();
-  const [passwordRequired, setPasswordRequired] = useState(false);
-  const [channelPasswordInput, setChannelPasswordInput] = useState();
-  const [error, setError] = useState();
+	const navigate = useNavigate();
+	const [roomToJoinInput, setroomToJoinInput] = useState();
+	const [roomToJoin, setRoomToJoin] = useState();
+	const [passwordRequired, setPasswordRequired] = useState(false);
+	const [channelPasswordInput, setChannelPasswordInput] = useState();
+	const [error, setError] = useState();
+	const [
+		currentExampleChannelInputPlaceholder,
+		setCurrentExampleChannelInputPlaceholder,
+	] = useState(0);
+	const [channelCreateInput, setChannelCreateInput] = useState();
+	const [isCreate, setIsCreate] = useState(true);
 
-  const handleJoinRoomSubmit = async (e) => {
-    e.preventDefault();
-    console.log(roomToJoinInput);
-    //Check if room requires password
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setCurrentExampleChannelInputPlaceholder(
+				(prevIndex) => (prevIndex + 1) % exampleChannelInputPlaceholders.length
+			);
+		}, 3000);
+		return () => clearInterval(interval);
+	}, [exampleChannelInputPlaceholders.length]);
 
-    let { data: channels, error } = await supabase
-      .from("channel")
-      .select("*")
-      .eq("channel_name", roomToJoinInput);
-    console.log(channels);
-    if (channels.length !== 0) {
-      let channel = channels[0];
-      setRoomToJoin(channel);
+	const handleJoinRoomSubmit = async (e) => {
+		e.preventDefault();
+		console.log(roomToJoinInput);
+		//Check if room requires password
 
-      if (!channel.public) {
-        setPasswordRequired(true);
-      } else {
-        alert("join room");
-      }
-    } else {
-      alert("No such room exists. Check your spelling");
-    }
+		let { data: channels, error } = await supabase
+			.from("channel")
+			.select("*")
+			.eq("channel_name", roomToJoinInput);
+		console.log(channels);
+		if (channels.length !== 0) {
+			let channel = channels[0];
+			setRoomToJoin(channel);
 
-    setroomToJoinInput("");
-  };
+			if (!channel.public) {
+				setError(null);
+				setPasswordRequired(true);
+			} else {
+				navigate(`/channel/${channel.public_channel_id}`);
+			}
+		} else {
+			setError({
+				errorCode: "201",
+				message: "No such room exists. Check your spelling",
+			});
+		}
+	};
 
-  const handleRoomChange = (e) => {
-    setroomToJoinInput(e.target.value);
-  };
+	const handleRoomChange = (e) => {
+		e.preventDefault();
+		setroomToJoinInput(e.target.value);
+		setPasswordRequired(false);
+		setChannelPasswordInput();
+	};
 
-  const handleChannelPasswordChange = (e) => {
-    e.preventDefault();
-    setChannelPasswordInput(e.target.value);
-  };
+	const handleChannelPasswordChange = (e) => {
+		e.preventDefault();
+		setChannelPasswordInput(e.target.value);
+	};
 
-  const handleSubmitChannelPassword = async (e) => {
-    e.preventDefault();
-    console.log(roomToJoin.channel_name);
-    console.log(e.target.value);
-    let { data: channels, error } = await supabase
-      .from("channel")
-      .select("channel_name, public_channel_id")
-      .eq("channel_name", roomToJoin.channel_name)
-      .eq("channel_password", channelPasswordInput);
+	const handleSubmitChannelPassword = async (e) => {
+		e.preventDefault();
+		console.log(roomToJoin.channel_name);
+		console.log(e.target.value);
+		let { data: channels, error } = await supabase
+			.from("channel")
+			.select("channel_name, public_channel_id")
+			.eq("channel_name", roomToJoin.channel_name)
+			.eq("channel_password", channelPasswordInput);
 
-    if (channels.length === 1) {
-      //action when correct password
-      //navigate to chatroom
-      navigate(`/channel/${channels[0].public_channel_id}`);
-    } else {
-      setError({ errorCode: "403", message: "password incorrect" });
-    }
-  };
+		if (channels.length === 1) {
+			//action when correct password
+			//navigate to chatroom
+			setroomToJoinInput("");
+			navigate(`/channel/${channels[0].public_channel_id}`);
+		} else {
+			setError({ errorCode: "403", message: "password incorrect" });
+		}
+	};
 
-  return (
-    <div>
-      <button>create room</button>
-      <div>
-        <form onSubmit={handleJoinRoomSubmit}>
-          <input
-            type="text"
-            value={roomToJoinInput}
-            onChange={handleRoomChange}
-          ></input>
-          <button type="submit">join room</button>
-        </form>
-      </div>
-      {passwordRequired ? (
-        <div>
-          <form onSubmit={handleSubmitChannelPassword}>
-            <input
-              type="password"
-              value={channelPasswordInput}
-              onChange={handleChannelPasswordChange}
-            ></input>
-            <button type="submit" onClick={handleSubmitChannelPassword}>
-              Submit
-            </button>
-            {error ? <p>{error.message}</p> : <p></p>}
-          </form>
-        </div>
-      ) : (
-        <></>
-      )}
-    </div>
-  );
+	const handleCreateChannelChange = (e) => {
+		e.preventDefault();
+		setChannelCreateInput(e.target.value);
+	};
+
+	const handleCreateChannelSubmit = async (e) => {
+		e.preventDefault();
+		let { data: channels, error } = await supabase
+			.from("channel")
+			.insert({ channel_name: channelCreateInput, public: true });
+		console.log(error);
+	};
+
+	const toggleCreateJoin = () => {
+		setIsCreate(!isCreate);
+	};
+
+	return (
+		<div className="flex items-center justify-center">
+			<div className="w-1/3">
+				<div className="pb-6">
+					<h1 className="text-7xl text-theme-red max-w-xl font-bold pb-6">
+						Just in time for the party!
+					</h1>
+					<p className="text-theme-peach max-w-xl text-2xl">
+						Experience a unique blend of shared playlists and interactive
+						conversations. Dive into a vibrant community where music and
+						connection come together seamlessly. Your social music journey
+						begins here!
+					</p>
+				</div>
+				{isCreate ? (
+					<div>
+						<div>
+							<form
+								onSubmit={handleCreateChannelSubmit}
+								className="flex space-x-4"
+							>
+								<Input
+									placeholder={
+										exampleChannelInputPlaceholders[
+											currentExampleChannelInputPlaceholder
+										]
+									}
+									value={channelCreateInput}
+									onChange={handleCreateChannelChange}
+								/>
+								<Button type="submit">Start Now</Button>
+							</form>
+						</div>
+					</div>
+				) : (
+					<div className="space-y-3">
+						<div>
+							<form onSubmit={handleJoinRoomSubmit} className="flex space-x-4">
+								<Input
+									type="text"
+									value={roomToJoinInput}
+									onChange={handleRoomChange}
+								/>
+								<Button type="submit">Join Channel</Button>
+							</form>
+						</div>
+						{passwordRequired ? (
+							<div>
+								<form
+									onSubmit={handleSubmitChannelPassword}
+									// className="space-y-4"
+								>
+									<label className="text-theme-peach">
+										Password<span className="text-theme-red font-bold"> *</span>
+									</label>
+									<div className="flex space-x-4">
+										<Input
+											type="password"
+											value={channelPasswordInput}
+											onChange={handleChannelPasswordChange}
+										></Input>
+										<Button type="submit" onClick={handleSubmitChannelPassword}>
+											Submit
+										</Button>
+									</div>
+								</form>
+							</div>
+						) : (
+							<></>
+						)}
+					</div>
+				)}
+				<div>
+					{error ? <p className="text-theme-red">{error.message}</p> : <p></p>}
+				</div>
+
+				<div className="mt-2">
+					{isCreate ? (
+						<p
+							className="text-theme-grey underline hover:cursor-pointer"
+							onClick={toggleCreateJoin}
+						>
+							Already have a channel? Join now.
+						</p>
+					) : (
+						<p
+							className="text-theme-grey underline hover:cursor-pointer"
+							onClick={toggleCreateJoin}
+						>
+							Don't have a channel? Create now.
+						</p>
+					)}
+				</div>
+			</div>
+			<div className="w-1/3">some art</div>
+		</div>
+	);
 }
 
 export default Home;
