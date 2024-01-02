@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import dayjs, { Dayjs } from "dayjs";
 import Input from "./common/Input";
+import axios from "axios";
 
 import "./Chat.css";
 
@@ -40,6 +41,7 @@ function Chat() {
     setUser(user);
 
     retrieveMessages();
+    setUpSpotify();
   }, []);
 
   const retrieveMessages = async () => {
@@ -58,6 +60,24 @@ function Chat() {
     setCurrentMessages(messages.reverse());
 
     setRetrievingMessages(false);
+  };
+
+  const setUpSpotify = async () => {
+    // get available devices
+    let accessToken = localStorage.getItem("access_token");
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + accessToken,
+      },
+    };
+    console.log(config);
+    let response2 = await axios.get("https://api.spotify.com/v1/me", config);
+    let response = await axios.get(
+      "https://api.spotify.com/v1/me/player/devices",
+      config
+    );
+    console.log(response);
   };
 
   const handleUserTextInputChange = (e) => {
