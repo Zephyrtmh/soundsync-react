@@ -7,6 +7,8 @@ import Home from "./components/Home";
 import Chat from "./components/Chat";
 import Channel from "./components/Channel";
 import Header from "./components/common/Header";
+import UserContext from "./contexts/UserContext";
+import SetUserContext from "./contexts/SetUserContext";
 
 function App() {
 	const [user, setUser] = useState();
@@ -37,9 +39,12 @@ function App() {
 		},
 	};
 
-	// useEffect(() => {
-	//   getUserData();
-	// }, []);
+	useEffect(() => {
+		console.log("this was ran on refresh");
+		let userLocalStorage = localStorage.getItem("user");
+		console.log(userLocalStorage);
+		setUser(JSON.parse(userLocalStorage));
+	}, []);
 
 	// async function getUserData() {
 	//   let response = await axios.get("https://api.spotify.com/v1/me", {
@@ -55,18 +60,19 @@ function App() {
 	// }
 
 	return (
-		<div>
-			<BrowserRouter>
-				<Header />
-				<Routes>
-					<Route path="login" element={<Login />} />
-					<Route path="test" element={<div>test</div>} />
-					<Route path="channel/:chatId" element={<Channel />} />
-					<Route path="*" element={<Home />} />
-					<Route path="/header" element={<Header />} />
-				</Routes>
-			</BrowserRouter>
-		</div>
+		<SetUserContext.Provider value={setUser}>
+			<UserContext.Provider value={user}>
+				<BrowserRouter>
+					<Header />
+					<Routes>
+						<Route path="login" element={<Login />} />
+						<Route path="test" element={<div>test</div>} />
+						<Route path="channel/:chatId" element={<Channel />} />
+						<Route path="*" element={<Home />} />
+					</Routes>
+				</BrowserRouter>
+			</UserContext.Provider>
+		</SetUserContext.Provider>
 	);
 }
 
