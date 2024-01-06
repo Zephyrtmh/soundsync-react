@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import dayjs, { Dayjs } from "dayjs";
@@ -6,6 +6,8 @@ import Input from "./common/Input";
 import axios from "axios";
 
 import "./Chat.css";
+import UserContext from "../contexts/UserContext";
+import ChatMessage from "./ChatMessage";
 import { useSupabase } from "../hooks/supabase";
 
 function Chat() {
@@ -14,6 +16,11 @@ function Chat() {
   const [user, setUser] = useState();
   const [currentMessages, setCurrentMessages] = useState([]);
   const [retrievingMessages, setRetrievingMessages] = useState(true);
+  const [retrievingChannel, setRetrievingChannel] = useState(true);
+
+  const [channel, setChannel] = useState();
+
+  const userContext = useContext(UserContext);
 
   const supabase = useSupabase();
 
@@ -23,21 +30,24 @@ function Chat() {
     setCurrentMessages(newMessages);
   };
 
-  const channel = supabase.channel(chatId);
+  const supabaseChannel = supabase.channel(chatId);
 
   supabase
     .channel(chatId)
     .on("broadcast", { event: "message" }, handleNewMessage)
     .subscribe();
 
+  //set up upon start up
   useEffect(() => {
-    let userString = localStorage.getItem("user");
-    let user = JSON.parse(userString);
-    setUser(user);
-
     retrieveMessages();
+    retrieveChannel();
     setUpSpotify();
   }, []);
+
+  //refresh when userContext changes
+  useEffect(() => {
+    setUser(userContext);
+  }, [userContext]);
 
   const retrieveMessages = async () => {
     let { data: messages, error } = await supabase
@@ -55,6 +65,24 @@ function Chat() {
     setCurrentMessages(messages.reverse());
 
     setRetrievingMessages(false);
+  };
+
+  const retrieveChannel = async () => {
+    let { data: channel, error } = await supabase
+      .from("channel")
+      .select("*")
+      .eq("public_channel_id", chatId)
+      .limit(1);
+
+    console.log(channel);
+    if (error) {
+      setRetrievingChannel(false);
+      console.error(error);
+    }
+    setChannel(channel[0]);
+
+    console.log(channel[0]);
+    setRetrievingChannel(false);
   };
 
   const setUpSpotify = async () => {
@@ -96,7 +124,7 @@ function Chat() {
       ])
       .select();
 
-    supabase.channel(chatId).subscribe((status) => {
+    supabaseChannel.subscribe((status) => {
       if (status === "SUBSCRIBED") {
         channel.send({
           type: "broadcast",
@@ -111,33 +139,24 @@ function Chat() {
     });
   };
 
-  if (retrievingMessages) {
+  if (retrievingMessages || retrievingChannel) {
     return <div>loading</div>;
   }
 
   return (
     <div>
-      <h1>Welcome to Chat: {chatId}</h1>
+      <h1>
+        Welcome to {channel?.channel_name}, {user.display_name}
+      </h1>
       <div className="chat-content-container">
         {currentMessages.map((message) => {
-          return (
-            <div
-              className={
-                user.display_name === message.author
-                  ? "user-message"
-                  : "other-user-message"
-              }
-            >
-              <p key={message.id}>{message.body}</p>
-              <p>{dayjs(message.sent_at).format("YYYY/MM/DD HH:mm:ss")}</p>
-            </div>
-          );
+          return <ChatMessage message={message} />;
         })}
       </div>
       <div className="user-input-container">
         <form onSubmit={handleUserTextInputSubmit}>
           <Input value={userTextInput} onChange={handleUserTextInputChange} />
-          <image src="./"></image>
+          <img src="./"></img>
           <button>Submit</button>
         </form>
       </div>

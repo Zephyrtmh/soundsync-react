@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "./common/Input";
 import Button from "./common/Button";
+import { createClient } from "@supabase/supabase-js";
+import UserContext from "../contexts/UserContext";
+import SetUserContext from "../contexts/SetUserContext";
 import { useSupabase } from "../hooks/supabase";
 
 const currentToken = {
@@ -37,7 +40,13 @@ const authorizationEndpoint = "https://accounts.spotify.com/authorize";
 const tokenEndpoint = "https://accounts.spotify.com/api/token";
 const scope = "user-read-private user-read-email";
 
+//for supabase
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 function Login() {
+  const [user, setUser] = useState();
   const navigate = useNavigate();
 
   const [emailInput, setEmailInput] = useState();
@@ -46,6 +55,9 @@ function Login() {
   const [errorMessage, setErrorMessage] = useState();
 
   const supabase = useSupabase();
+
+  const userContext = useContext(UserContext);
+  const setUserContext = useContext(SetUserContext);
 
   useEffect(() => {
     async function handleGetAccessToken() {
@@ -67,8 +79,7 @@ function Login() {
           window.history.replaceState({}, document.title, updatedUrl);
 
           let user = await getUserData();
-          console.log("spotify user", user);
-
+          setUser(user);
           localStorage.setItem("user", JSON.stringify(user));
           navigate("/home");
         } catch (err) {
@@ -78,6 +89,42 @@ function Login() {
     }
     handleGetAccessToken();
   }, []);
+
+  async function redirectToSpotifyAuthorize() {
+    const possible =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const randomValues = crypto.getRandomValues(new Uint8Array(64));
+    const randomString = randomValues.reduce(
+      (acc, x) => acc + possible[x % possible.length],
+      ""
+    );
+
+    const code_verifier = randomString;
+    const data = new TextEncoder().encode(code_verifier);
+    const hashed = await crypto.subtle.digest("SHA-256", data);
+
+    const code_challenge_base64 = btoa(
+      String.fromCharCode(...new Uint8Array(hashed))
+    )
+      .replace(/=/g, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+
+    window.localStorage.setItem("code_verifier", code_verifier);
+
+    const authUrl = new URL(authorizationEndpoint);
+    const params = {
+      response_type: "code",
+      client_id: process.env.REACT_APP_CLIENT_ID,
+      scope: scope,
+      code_challenge_method: "S256",
+      code_challenge: code_challenge_base64,
+      redirect_uri: redirectUrl,
+    };
+
+    authUrl.search = new URLSearchParams(params).toString();
+    window.location.href = authUrl.toString(); // Redirect the user to the authorization server for login
+  }
 
   async function getAccessToken(code) {
     console.log("local storage", localStorage.getItem("code_verifier"));
@@ -141,6 +188,12 @@ function Login() {
     } else {
       setEmailInput("");
       setPasswordInput("");
+      let { data: publicUserData, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("user_id", data.user.id);
+      localStorage.setItem("user", JSON.stringify(publicUserData[0]));
+      setUserContext(publicUserData[0]);
 
       navigate("/");
     }
