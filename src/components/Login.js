@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "./common/Input";
 import Button from "./common/Button";
+import { useSupabase } from "../hooks/supabase";
 
 const currentToken = {
   get access_token() {
@@ -37,12 +38,14 @@ const tokenEndpoint = "https://accounts.spotify.com/api/token";
 const scope = "user-read-private user-read-email";
 
 function Login() {
-  const [user, setUser] = useState();
   const navigate = useNavigate();
 
   const [emailInput, setEmailInput] = useState();
   const [passwordInput, setPasswordInput] = useState();
   const [showEmailLogin, setShowEmailLogin] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
+
+  const supabase = useSupabase();
 
   useEffect(() => {
     async function handleGetAccessToken() {
@@ -64,7 +67,8 @@ function Login() {
           window.history.replaceState({}, document.title, updatedUrl);
 
           let user = await getUserData();
-          setUser(user);
+          console.log("spotify user", user);
+
           localStorage.setItem("user", JSON.stringify(user));
           navigate("/home");
         } catch (err) {
@@ -74,42 +78,6 @@ function Login() {
     }
     handleGetAccessToken();
   }, []);
-
-  async function redirectToSpotifyAuthorize() {
-    const possible =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    const randomValues = crypto.getRandomValues(new Uint8Array(64));
-    const randomString = randomValues.reduce(
-      (acc, x) => acc + possible[x % possible.length],
-      ""
-    );
-
-    const code_verifier = randomString;
-    const data = new TextEncoder().encode(code_verifier);
-    const hashed = await crypto.subtle.digest("SHA-256", data);
-
-    const code_challenge_base64 = btoa(
-      String.fromCharCode(...new Uint8Array(hashed))
-    )
-      .replace(/=/g, "")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_");
-
-    window.localStorage.setItem("code_verifier", code_verifier);
-
-    const authUrl = new URL(authorizationEndpoint);
-    const params = {
-      response_type: "code",
-      client_id: process.env.REACT_APP_CLIENT_ID,
-      scope: scope,
-      code_challenge_method: "S256",
-      code_challenge: code_challenge_base64,
-      redirect_uri: redirectUrl,
-    };
-
-    authUrl.search = new URLSearchParams(params).toString();
-    window.location.href = authUrl.toString(); // Redirect the user to the authorization server for login
-  }
 
   async function getAccessToken(code) {
     console.log("local storage", localStorage.getItem("code_verifier"));
@@ -161,21 +129,40 @@ function Login() {
     setPasswordInput(e.target.value);
   };
 
-  const onLoginSubmit = (e) => {
+  const onLoginSubmit = async (e) => {
     e.preventDefault();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: emailInput,
+      password: passwordInput,
+    });
+
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      setEmailInput("");
+      setPasswordInput("");
+
+      navigate("/");
+    }
   };
 
   const toggleShowEmailLogin = () => {
     setShowEmailLogin(!showEmailLogin);
   };
 
+  const signInWithSpotify = () => {
+    supabase.auth.signInWithOAuth({
+      provider: "spotify",
+    });
+  };
+
   return (
     <div className="flex justify-center pt-20">
-      <div className="flex flex-col justify-center items-center space-y-10 w-1/3 border-2 border-theme-red pt-10 pb-10 pl-4 pr-4">
+      <div className="flex flex-col justify-center items-center space-y-10 sm:w-[500px] border-2 border-theme-red pt-10 pb-10 pl-4 pr-4">
         <h1 className="text-4xl text-theme-peach">Login</h1>
         <div className="flex flex-col items-center text-theme-red">
           <button
-            onClick={redirectToSpotifyAuthorize}
+            onClick={signInWithSpotify}
             className="group flex items-center space-x-2 ring-1 pl-6 pr-6 pt-2 pb-2 rounded-lg ring-theme-peach hover:bg-theme-peach hover:ring-theme-blue"
           >
             <img

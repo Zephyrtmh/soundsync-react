@@ -7,67 +7,71 @@ import Home from "./components/Home";
 import Chat from "./components/Chat";
 import Channel from "./components/Channel";
 import Header from "./components/common/Header";
+import Signup from "./components/Signup";
+import { createSupabase } from "./hooks/supabase";
 
 function App() {
-	const [user, setUser] = useState();
+  const [user, setUser] = useState();
 
-	const currentToken = {
-		get access_token() {
-			return localStorage.getItem("access_token") || null;
-		},
-		get refresh_token() {
-			return localStorage.getItem("refresh_token") || null;
-		},
-		get expires_in() {
-			return localStorage.getItem("refresh_in") || null;
-		},
-		get expires() {
-			return localStorage.getItem("expires") || null;
-		},
+  createSupabase();
 
-		save: function (response) {
-			const { access_token, refresh_token, expires_in } = response;
-			localStorage.setItem("access_token", access_token);
-			localStorage.setItem("refresh_token", refresh_token);
-			localStorage.setItem("expires_in", expires_in);
+  const currentToken = {
+    get access_token() {
+      return localStorage.getItem("access_token") || null;
+    },
+    get refresh_token() {
+      return localStorage.getItem("refresh_token") || null;
+    },
+    get expires_in() {
+      return localStorage.getItem("refresh_in") || null;
+    },
+    get expires() {
+      return localStorage.getItem("expires") || null;
+    },
 
-			const now = new Date();
-			const expiry = new Date(now.getTime() + expires_in * 1000);
-			localStorage.setItem("expires", expiry);
-		},
-	};
+    save: function (response) {
+      const { access_token, refresh_token, expires_in } = response;
+      localStorage.setItem("access_token", access_token);
+      localStorage.setItem("refresh_token", refresh_token);
+      localStorage.setItem("expires_in", expires_in);
 
-	// useEffect(() => {
-	//   getUserData();
-	// }, []);
+      const now = new Date();
+      const expiry = new Date(now.getTime() + expires_in * 1000);
+      localStorage.setItem("expires", expiry);
+    },
+  };
 
-	// async function getUserData() {
-	//   let response = await axios.get("https://api.spotify.com/v1/me", {
-	//     headers: { Authorization: "Bearer " + currentToken.access_token },
-	//   });
-	//   // const response = await fetch("https://api.spotify.com/v1/me", {
-	//   //   method: "GET",
-	//   //   headers: { Authorization: "Bearer " + currentToken.access_token },
-	//   // });
-	//   setUser(response.data);
-	//   console.log(response.data.images[0].url);
-	//   return response.data;
-	// }
+  // useEffect(() => {
+  //   getUserData();
+  // }, []);
 
-	return (
-		<div>
-			<BrowserRouter>
-				<Header />
-				<Routes>
-					<Route path="login" element={<Login />} />
-					<Route path="test" element={<div>test</div>} />
-					<Route path="channel/:chatId" element={<Channel />} />
-					<Route path="*" element={<Home />} />
-					<Route path="/header" element={<Header />} />
-				</Routes>
-			</BrowserRouter>
-		</div>
-	);
+  // async function getUserData() {
+  //   let response = await axios.get("https://api.spotify.com/v1/me", {
+  //     headers: { Authorization: "Bearer " + currentToken.access_token },
+  //   });
+  //   // const response = await fetch("https://api.spotify.com/v1/me", {
+  //   //   method: "GET",
+  //   //   headers: { Authorization: "Bearer " + currentToken.access_token },
+  //   // });
+  //   setUser(response.data);
+  //   console.log(response.data.images[0].url);
+  //   return response.data;
+  // }
+
+  return (
+    <div>
+      <BrowserRouter>
+        <Header />
+        <Routes>
+          <Route path="login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="test" element={<div>test</div>} />
+          <Route path="channel/:chatId" element={<Channel />} />
+          <Route path="*" element={<Home />} />
+        </Routes>
+      </BrowserRouter>
+    </div>
+  );
 }
 
 export default App;

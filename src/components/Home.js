@@ -4,10 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import Input from "./common/Input";
 import Button from "./common/Button";
-
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { useSupabase } from "../hooks/supabase";
 
 const exampleChannelInputPlaceholders = [
   "20s Rock Music",
@@ -59,6 +56,8 @@ function Home() {
   ] = useState(0);
   const [channelCreateInput, setChannelCreateInput] = useState();
   const [isCreate, setIsCreate] = useState(true);
+
+  const supabase = useSupabase();
 
   useEffect(() => {
     const interval = setInterval(() => {

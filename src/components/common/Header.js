@@ -23,7 +23,12 @@ function Header() {
       </div>
       <ul className="inline-flex space-x-12">
         <li className="hover:cursor-pointer hover:underline">Explore</li>
-        <li className="hover:cursor-pointer hover:underline">Sign up</li>
+        <li
+          className="hover:cursor-pointer hover:underline"
+          onClick={onSignUpClick}
+        >
+          Sign up
+        </li>
       </ul>
     </div>
   );

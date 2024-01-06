@@ -6,10 +6,7 @@ import Input from "./common/Input";
 import axios from "axios";
 
 import "./Chat.css";
-
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { useSupabase } from "../hooks/supabase";
 
 function Chat() {
   const { chatId } = useParams();
@@ -18,21 +15,19 @@ function Chat() {
   const [currentMessages, setCurrentMessages] = useState([]);
   const [retrievingMessages, setRetrievingMessages] = useState(true);
 
+  const supabase = useSupabase();
+
   const handleNewMessage = (message) => {
-    // console.log("insert received", message);
-    console.log(message.new);
-    console.log(currentMessages);
-    let newMessages = [...currentMessages, message.new];
+    let newMessages = [...currentMessages, message.payload];
+    console.log(message);
     setCurrentMessages(newMessages);
   };
 
+  const channel = supabase.channel(chatId);
+
   supabase
-    .channel("todos")
-    .on(
-      "postgres_changes",
-      { event: "INSERT", schema: "public", table: "message" },
-      handleNewMessage
-    )
+    .channel(chatId)
+    .on("broadcast", { event: "message" }, handleNewMessage)
     .subscribe();
 
   useEffect(() => {
@@ -72,12 +67,12 @@ function Chat() {
       },
     };
     console.log(config);
-    let response2 = await axios.get("https://api.spotify.com/v1/me", config);
-    let response = await axios.get(
-      "https://api.spotify.com/v1/me/player/devices",
-      config
-    );
-    console.log(response);
+    // let response2 = await axios.get("https://api.spotify.com/v1/me", config);
+    // let response = await axios.get(
+    //   "https://api.spotify.com/v1/me/player/devices",
+    //   config
+    // );
+    // console.log(response);
   };
 
   const handleUserTextInputChange = (e) => {
@@ -100,6 +95,20 @@ function Chat() {
         },
       ])
       .select();
+
+    supabase.channel(chatId).subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        channel.send({
+          type: "broadcast",
+          event: "message",
+          payload: {
+            author: user.display_name,
+            body: userTextInput,
+            public_channel_id: chatId,
+          },
+        });
+      }
+    });
   };
 
   if (retrievingMessages) {
