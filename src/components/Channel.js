@@ -10,7 +10,7 @@ function Channel() {
   };
 
   // Attach the event listener when the component mounts
-  document.addEventListener("keydown", handleKeyDown);
+  // document.addEventListener("keydown", handleKeyDown);
 
   return (
     <div className="channel-display-container">
@@ -18,7 +18,7 @@ function Channel() {
       <div className="channel">
         <div>live stream</div>
         <div className="chat">
-          <Chat></Chat>
+          <Chat />
         </div>
       </div>
     </div>
