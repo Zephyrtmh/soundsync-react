@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import dayjs, { Dayjs } from "dayjs";
 import Input from "./common/Input";
 import axios from "axios";
+import { v4 as uuid } from "uuid";
 
 import "./Chat.css";
 import UserContext from "../contexts/UserContext";
@@ -25,9 +26,7 @@ function Chat() {
   const supabase = useSupabase();
 
   const handleNewMessage = (message) => {
-    let newMessages = [message.payload, ...currentMessages];
-    console.log(message);
-    setCurrentMessages(newMessages);
+    setCurrentMessages((prevMessages) => [...prevMessages, message.payload]);
   };
 
   const supabaseChannel = supabase.channel(chatId);
@@ -38,11 +37,13 @@ function Chat() {
   //   }
   // });
 
+  useEffect(() => {}, [currentMessages]);
+
   // set up upon start up
   useEffect(() => {
     supabase
       .channel(chatId)
-      .on("broadcast", { event: "message" }, handleNewMessage)
+      .on("broadcast", { event: chatId }, handleNewMessage)
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
           console.log("subscribed");
@@ -64,7 +65,7 @@ function Chat() {
       .from("message")
       .select("*")
       .eq("public_channel_id", chatId)
-      .order("sent_at", { ascending: false })
+      .order("sent_at", { ascending: true })
       .limit(10);
 
     if (error) {
@@ -72,7 +73,7 @@ function Chat() {
       alert("error retrieving messages");
     }
 
-    setCurrentMessages(messages.reverse());
+    setCurrentMessages(messages);
 
     setRetrievingMessages(false);
   };
@@ -123,7 +124,9 @@ function Chat() {
     //submit chat message
     console.log(chatId);
 
-    const { data, error } = await supabase
+    setUserTextInput("");
+
+    const { data: addedMessage, error } = await supabase
       .from("message")
       .insert([
         {
@@ -136,11 +139,13 @@ function Chat() {
 
     supabaseChannel.send({
       type: "broadcast",
-      event: "message",
+      event: chatId,
       payload: {
+        id: addedMessage[0].id,
         author: user.display_name,
         body: userTextInput,
         public_channel_id: chatId,
+        sent_at: dayjs(),
       },
     });
   };
