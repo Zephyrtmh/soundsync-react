@@ -132,7 +132,7 @@ function Login() {
       client_id: process.env.REACT_APP_CLIENT_ID,
       grant_type: "authorization_code",
       code: code,
-      redirect_uri: "http://localhost:3000/login",
+      redirect_uri: `${process.env.REACT_APP_BASE_URL}/login`,
       code_verifier: localStorage.getItem("code_verifier"),
     };
 
@@ -195,7 +195,7 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(publicUserData[0]));
       setUserContext(publicUserData[0]);
 
-      navigate("/");
+      navigate("/soundsync-react/home");
     }
   };
 

@@ -45,6 +45,7 @@ function App() {
 
   useEffect(() => {
     console.log("this was ran on refresh");
+    console.log(process.env.NODE_ENV);
     let userLocalStorage = localStorage.getItem("user");
     console.log(userLocalStorage);
     setUser(JSON.parse(userLocalStorage));
@@ -66,10 +67,14 @@ function App() {
   return (
     <SetUserContext.Provider value={setUser}>
       <UserContext.Provider value={user}>
-        <BrowserRouter>
+        <BrowserRouter
+          basename={
+            process.env.NODE_ENV === "production" ? "/soundsync-react" : ""
+          }
+        >
           <Header />
           <Routes>
-            <Route path="login" element={<Login />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="test" element={<div>test</div>} />
             <Route path="channel/:chatId" element={<Channel />} />
