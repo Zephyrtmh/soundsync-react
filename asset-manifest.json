@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/soundsync-react/static/css/main.a1bca6c3.css",
-    "main.js": "/soundsync-react/static/js/main.b4aa6083.js",
+    "main.js": "/soundsync-react/static/js/main.a8d97851.js",
     "static/js/289.3a381860.chunk.js": "/soundsync-react/static/js/289.3a381860.chunk.js",
     "static/js/787.95417342.chunk.js": "/soundsync-react/static/js/787.95417342.chunk.js",
     "index.html": "/soundsync-react/index.html",
     "main.a1bca6c3.css.map": "/soundsync-react/static/css/main.a1bca6c3.css.map",
-    "main.b4aa6083.js.map": "/soundsync-react/static/js/main.b4aa6083.js.map",
+    "main.a8d97851.js.map": "/soundsync-react/static/js/main.a8d97851.js.map",
     "289.3a381860.chunk.js.map": "/soundsync-react/static/js/289.3a381860.chunk.js.map",
     "787.95417342.chunk.js.map": "/soundsync-react/static/js/787.95417342.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a1bca6c3.css",
-    "static/js/main.b4aa6083.js"
+    "static/js/main.a8d97851.js"
   ]
 }
