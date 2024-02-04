@@ -13,11 +13,11 @@ function Channel() {
   // document.addEventListener("keydown", handleKeyDown);
 
   return (
-    <div className="channel-display-container">
+    <div className="channel-display-container w-lvw">
       <div className="channel-navigation-bar">channels</div>
       <div className="channel">
         <div>live stream</div>
-        <div className="chat">
+        <div>
           <Chat />
         </div>
       </div>

@@ -169,13 +169,13 @@ function Chat() {
   }
 
   return (
-    <div>
+    <div className="chat absolute left-0 bottom-0 w-1/3 ">
       <h1>
         Welcome to {channel?.channel_name}, {user.display_name}
       </h1>
       <div
         ref={chatBoxContainerRef}
-        className="chat-content-container h-64 overflow-y-auto scroll "
+        className="chat-content-container h-64 overflow-y-auto"
       >
         {currentMessages.map((message) => {
           return <ChatMessage message={message} key={message.id} />;
