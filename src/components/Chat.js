@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import dayjs, { Dayjs } from "dayjs";
@@ -25,8 +25,14 @@ function Chat() {
 
   const supabase = useSupabase();
 
+  const chatBoxContainerRef = useRef(null);
+  const bottomOfChatBoxRef = useRef(null);
+
   const handleNewMessage = (message) => {
     setCurrentMessages((prevMessages) => [...prevMessages, message.payload]);
+    // chatBoxContainerRef.current.scrollTop = chatBoxContainerRef.current.height;
+    console.log(currentMessages);
+    bottomOfChatBoxRef.current.scrollIntoView({ block: "start" });
   };
 
   const supabaseChannel = supabase.channel(chatId);
@@ -60,12 +66,20 @@ function Chat() {
     console.log("user context change");
   }, [userContext]);
 
+  useEffect(() => {
+    if (bottomOfChatBoxRef.current) {
+      bottomOfChatBoxRef.current.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
+  }, [bottomOfChatBoxRef]);
+
   const retrieveMessages = async () => {
     let { data: messages, error } = await supabase
       .from("message")
       .select("*")
       .eq("public_channel_id", chatId)
-      .order("sent_at", { ascending: true })
+      .order("sent_at", { ascending: false })
       .limit(10);
 
     if (error) {
@@ -73,7 +87,7 @@ function Chat() {
       alert("error retrieving messages");
     }
 
-    setCurrentMessages(messages);
+    setCurrentMessages(messages.reverse());
 
     setRetrievingMessages(false);
   };
@@ -159,11 +173,20 @@ function Chat() {
       <h1>
         Welcome to {channel?.channel_name}, {user.display_name}
       </h1>
-      <div className="chat-content-container">
+      <div
+        ref={chatBoxContainerRef}
+        className="chat-content-container h-64 overflow-y-auto scroll "
+      >
         {currentMessages.map((message) => {
           return <ChatMessage message={message} key={message.id} />;
         })}
+        <div
+          style={{ float: "left", clear: "both" }}
+          ref={bottomOfChatBoxRef}
+          className="scroll-mb-10"
+        ></div>
       </div>
+
       <div className="user-input-container">
         <form onSubmit={handleUserTextInputSubmit}>
           <Input value={userTextInput} onChange={handleUserTextInputChange} />

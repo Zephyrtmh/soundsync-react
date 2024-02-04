@@ -71,27 +71,29 @@ function Home() {
   const handleJoinRoomSubmit = async (e) => {
     e.preventDefault();
     //Check if room requires password
+    try {
+      let { data: channels, error } = await supabase
+        .from("channel")
+        .select("*")
+        .eq("channel_name", roomToJoinInput);
+      if (channels && channels.length !== 0) {
+        let channel = channels[0];
+        setRoomToJoin(channel);
 
-    let { data: channels, error } = await supabase
-      .from("channel")
-      .select("*")
-      .eq("channel_name", roomToJoinInput);
-    console.log(channels);
-    if (channels.length !== 0) {
-      let channel = channels[0];
-      setRoomToJoin(channel);
-
-      if (!channel.public) {
-        setError(null);
-        setPasswordRequired(true);
+        if (!channel.public) {
+          setError(null);
+          setPasswordRequired(true);
+        } else {
+          navigate(`/channel/${channel.public_channel_id}`);
+        }
       } else {
-        navigate(`/channel/${channel.public_channel_id}`);
+        setError({
+          errorCode: "201",
+          message: "No such room exists. Check your spelling",
+        });
       }
-    } else {
-      setError({
-        errorCode: "201",
-        message: "No such room exists. Check your spelling",
-      });
+    } catch (err) {
+      console.error(err);
     }
   };
 
